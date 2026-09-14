@@ -116,3 +116,14 @@ h1 {
   max-width: 800px;
   margin: 0 auto;
 }
+
+/* Карточки внутри резюме — на всю ширину */
+.resume-container .card {
+  width: 100%;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  padding: 25px;
+  margin-bottom: 25px;
+  box-sizing: border-box;
+}
