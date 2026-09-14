@@ -60,9 +60,6 @@ function loadTab(btn) {
       var match = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
       var inner = match ? match[1] : html;
 
-      // убираем ссылку "вернуться на главную" — она не нужна внутри вкладки
-      inner = inner.replace(/<a href="[^"]*index\.html"[^>]*>[\s\S]*?<\/a>/i, '');
-
       // "../css/..", "../images/.." -> без "../", т.к. вставляется в index.html,
       // который лежит на уровень выше, чем pages/
       inner = inner.replace(/(src|href)="\.\.\//g, '$1="');
