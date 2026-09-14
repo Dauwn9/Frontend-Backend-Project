@@ -4,20 +4,41 @@
   <meta charset="UTF-8">
   <title>Резюме Даурен</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 40px; background: #f9f9f9; }
+    body { font-family: Arial, sans-serif; margin: 40px; background: #f0f2f5; }
     h1, h2 { color: #333; }
     .section { margin-bottom: 30px; }
     .skills, .experience, .education { list-style: none; padding: 0; }
     .skills li, .experience li, .education li { margin-bottom: 10px; }
     .contact a { color: #007BFF; text-decoration: none; }
     .contact a:hover { text-decoration: underline; }
+
+    /* Карточки секций */
+    .card {
+      background: white; border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      padding: 20px; margin-bottom: 20px;
+    }
+
+    /* Фото профиля */
+    .profile {
+      text-align: center; margin-bottom: 30px;
+    }
+    .profile img {
+      width: 150px; height: 150px;
+      border-radius: 50%; object-fit: cover;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    .profile h1 { margin-top: 15px; }
   </style>
 </head>
 <body>
-  <h1>Даурен</h1>
-  <p><strong>Цель:</strong> Освоить Python и создать серьёзные проекты для резюме.</p>
+  <div class="profile">
+    <img src="images/profile.jpg" alt="Фото Даурен">
+    <h1>Даурен</h1>
+    <p><strong>Цель:</strong> Освоить Python и создать серьёзные проекты для резюме.</p>
+  </div>
 
-  <div class="section">
+  <div class="card">
     <h2>Навыки</h2>
     <ul class="skills">
       <li>Python (начальный/средний уровень, проекты с Flask, matplotlib)</li>
@@ -28,7 +49,7 @@
     </ul>
   </div>
 
-  <div class="section">
+  <div class="card">
     <h2>Опыт</h2>
     <ul class="experience">
       <li>Проекты на Python: веб‑приложения, парсеры данных, Telegram‑боты</li>
@@ -37,7 +58,7 @@
     </ul>
   </div>
 
-  <div class="section">
+  <div class="card">
     <h2>Образование</h2>
     <ul class="education">
       <li>Самостоятельное изучение Python и политологии</li>
@@ -45,7 +66,7 @@
     </ul>
   </div>
 
-  <div class="section contact">
+  <div class="card contact">
     <h2>Контакты</h2>
     <p>Email: <a href="mailto:example@mail.com">example@mail.com</a></p>
     <p>Телефон: <a href="tel:+77000000000">+7 700 000 0000</a></p>
