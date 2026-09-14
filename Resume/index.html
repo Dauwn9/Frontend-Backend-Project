@@ -10,15 +10,41 @@
 
   <div class="tabs">
     <div class="tabs__nav" role="tablist">
-      <button class="tabs__btn is-active" role="tab" aria-selected="true" data-src="pages/page1.html">Даурен</button>
+      <button class="tabs__btn is-active" role="tab" aria-selected="true" data-home="true">Главная</button>
+      <button class="tabs__btn" role="tab" aria-selected="false" data-src="pages/page1.html">Даурен</button>
       <button class="tabs__btn" role="tab" aria-selected="false" data-src="pages/page2.html">Даша</button>
       <button class="tabs__btn" role="tab" aria-selected="false" data-src="pages/page3.html">Айжан</button>
     </div>
 
     <div class="tabs__content" id="tabsContent" role="tabpanel">
-      <!-- сюда подгружается содержимое из pages/ -->
+      <!-- сюда подгружается содержимое: либо карточки, либо страница из pages/ -->
     </div>
   </div>
+
+  <!-- Разметка карточек главной страницы. Не показывается напрямую,
+       tabs.js берёт её отсюда и вставляет в tabsContent -->
+  <template id="homeTemplate">
+    <div class="cards">
+      <div class="card" data-target="pages/page1.html">
+        <img src="images/resume.jpg" alt="Резюме">
+        <div class="card-content">
+          <a href="pages/page1.html" data-target="pages/page1.html">Даурен</a>
+        </div>
+      </div>
+      <div class="card" data-target="pages/page2.html">
+        <img src="images/page2.jpg" alt="Страница 2">
+        <div class="card-content">
+          <a href="pages/page2.html" data-target="pages/page2.html">Даша</a>
+        </div>
+      </div>
+      <div class="card" data-target="pages/page3.html">
+        <img src="images/page3.jpg" alt="Страница 3">
+        <div class="card-content">
+          <a href="pages/page3.html" data-target="pages/page3.html">Айжан</a>
+        </div>
+      </div>
+    </div>
+  </template>
 
   <script src="js/tabs.js"></script>
 </body>
