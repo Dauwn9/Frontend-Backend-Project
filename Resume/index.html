@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Главная страница</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <h1>Навигация по страницам</h1>
+
+  <div class="tabs">
+    <div class="tabs__nav" role="tablist">
+      <button class="tabs__btn is-active" role="tab" aria-selected="true" data-src="pages/page1.html">Даурен</button>
+      <button class="tabs__btn" role="tab" aria-selected="false" data-src="pages/page2.html">Даша</button>
+      <button class="tabs__btn" role="tab" aria-selected="false" data-src="pages/page3.html">Айжан</button>
+    </div>
+
+    <div class="tabs__content" id="tabsContent" role="tabpanel">
+      <!-- сюда подгружается содержимое из pages/ -->
+    </div>
+  </div>
+
+  <script src="js/tabs.js"></script>
+</body>
+</html>
