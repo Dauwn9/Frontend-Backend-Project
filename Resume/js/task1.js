@@ -5,10 +5,9 @@
   var root = document.getElementById('task1Root');
   if (!root) return;
 
-  var target = root.querySelector('#task1Target');
-  var oldElement = root.querySelector('.task1-old-element');
   var dynamicArea = root.querySelector('#task1Dynamic');
-  var paragraph = null; // появится только после клика на кнопку 4
+  var dynamicText = null;   // элемент, которым управляют кнопки 1-3
+  var paragraph = null;     // появится только после клика на кнопку 4
 
   root.querySelectorAll('[data-action]').forEach(function (btn) {
     btn.addEventListener('click', function () {
@@ -16,24 +15,26 @@
 
       // 1. Добавить текст ("Я новый элемент")
       if (action === 'add-text') {
-        var newDiv = document.createElement('div');
-        newDiv.classList.add('new-div', 'card', 'card-content');
-        newDiv.textContent = 'Я новый элемент';
-        dynamicArea.appendChild(newDiv);
-      }
-
-      // 2. Заменить текст на "Привет, мир!"
-      if (action === 'replace-text') {
-        if (target) {
-          target.textContent = 'Привет, мир!';
+        if (!dynamicText) {
+          dynamicText = document.createElement('div');
+          dynamicText.classList.add('new-div', 'card', 'card-content');
+          dynamicText.textContent = 'Я новый элемент';
+          dynamicArea.appendChild(dynamicText);
         }
       }
 
-      // 3. Удалить текст (карточку с task1-old-element)
+      // 2. Заменить текст этого же элемента на "Привет, мир!"
+      if (action === 'replace-text') {
+        if (dynamicText) {
+          dynamicText.textContent = 'Привет, мир!';
+        }
+      }
+
+      // 3. Удалить этот же элемент
       if (action === 'remove-text') {
-        if (oldElement) {
-          oldElement.remove();
-          oldElement = null; // чтобы повторный клик ничего не ломал
+        if (dynamicText) {
+          dynamicText.remove();
+          dynamicText = null; // чтобы кнопка 1 могла создать его заново
         }
       }
 
