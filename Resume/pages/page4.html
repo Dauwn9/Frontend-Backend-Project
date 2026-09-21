@@ -6,22 +6,32 @@
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-  <h1>Задание 1: Найдите элемент по ID и измените его текст на "Привет, мир!".
-Создайте новый элемент "div" с классом new-div и текстом "Я новый элемент", и добавьте его в конец "body".
-Удалите элемент с классом old-element.
-Создайте элемент "p" с текстом "Это изменяемый абзац."
-При клике на абзац измените его цвет текста и размер шрифта.</h1>
 
   <div class="resume-container" id="task1Root">
+
+    <div class="card">
+      <h2>Управление элементами</h2>
+      <div class="task1-buttons">
+        <button type="button" data-action="add-text">1. Добавить текст</button>
+        <button type="button" data-action="replace-text">2. Заменить текст на "Привет мир"</button>
+        <button type="button" data-action="remove-text">3. Удалить текст</button>
+        <button type="button" data-action="toggle-paragraph">4. Изменяемый абзац</button>
+      </div>
+    </div>
+
     <div class="card">
       <h2>Элемент по ID</h2>
       <p id="task1Target">Старый текст</p>
     </div>
 
     <div class="card task1-old-element">
-      <h2>Этот блок будет удалён</h2>
-      <p>Как только загрузится скрипт, этой карточки не станет.</p>
+      <h2>Этот блок можно удалить</h2>
+      <p>Нажмите кнопку «3. Удалить текст» — эта карточка исчезнет.</p>
     </div>
+
+    <!-- сюда кнопки 1 и 4 будут добавлять новые элементы -->
+    <div id="task1Dynamic"></div>
+
   </div>
 
   <script src="../js/task1.js"></script>
