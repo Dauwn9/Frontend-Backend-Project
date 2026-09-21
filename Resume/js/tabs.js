@@ -32,6 +32,19 @@ function wireHomeCards() {
   });
 }
 
+// <script>, вставленный через innerHTML, браузер сам не выполняет —
+// нужно вручную пересоздать тег, тогда он сработает (в т.ч. с внешним src).
+function executeScripts(container) {
+  container.querySelectorAll('script').forEach(function (oldScript) {
+    var newScript = document.createElement('script');
+    Array.prototype.slice.call(oldScript.attributes).forEach(function (attr) {
+      newScript.setAttribute(attr.name, attr.value);
+    });
+    newScript.textContent = oldScript.textContent;
+    oldScript.parentNode.replaceChild(newScript, oldScript);
+  });
+}
+
 function loadTab(btn) {
   setActiveButton(btn);
 
@@ -46,6 +59,7 @@ function loadTab(btn) {
 
   if (cache[src]) {
     content.innerHTML = cache[src];
+    executeScripts(content);
     return;
   }
 
@@ -66,6 +80,7 @@ function loadTab(btn) {
 
       cache[src] = inner;
       content.innerHTML = inner;
+      executeScripts(content);
     })
     .catch(function (err) {
       content.textContent = 'Не удалось загрузить "' + src + '": ' + err.message;

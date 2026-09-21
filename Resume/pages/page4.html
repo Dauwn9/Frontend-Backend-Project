@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Task 1</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <h1>Задание 1: Найдите элемент по ID и измените его текст на "Привет, мир!".
+Создайте новый элемент "div" с классом new-div и текстом "Я новый элемент", и добавьте его в конец "body".
+Удалите элемент с классом old-element.
+Создайте элемент "p" с текстом "Это изменяемый абзац."
+При клике на абзац измените его цвет текста и размер шрифта.</h1>
+
+  <div class="resume-container" id="task1Root">
+    <div class="card">
+      <h2>Элемент по ID</h2>
+      <p id="task1Target">Старый текст</p>
+    </div>
+
+    <div class="card task1-old-element">
+      <h2>Этот блок будет удалён</h2>
+      <p>Как только загрузится скрипт, этой карточки не станет.</p>
+    </div>
+  </div>
+
+  <script src="../js/task1.js"></script>
+
+</body>
+</html>
