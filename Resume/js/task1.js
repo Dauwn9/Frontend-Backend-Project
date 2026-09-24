@@ -1,14 +1,15 @@
-// Всё ищем и добавляем внутри #task1Root — так скрипт безопасно работает
-// и как отдельная страница, и как вкладка, которую можно открывать
-// и закрывать много раз подряд без дублирования элементов.
 (function () {
   var root = document.getElementById('task1Root');
   if (!root) return;
 
-  var dynamicArea = root.querySelector('#task1Dynamic');
+  var dynamicArea = root.querySelector('#task1Dynamic'); // для кнопки 4 (абзац остаётся внутри карточки)
   var dynamicText = null;   // элемент, которым управляют кнопки 1-3
   var paragraph = null;     // появится только после клика на кнопку 4
   var paragraphChanged = false; // в каком сейчас состоянии абзац
+
+
+  var leftover = document.getElementById('task1OutsideText');
+  if (leftover) leftover.remove();
 
   root.querySelectorAll('[data-action]').forEach(function (btn) {
     btn.addEventListener('click', function () {
@@ -18,9 +19,10 @@
       if (action === 'add-text') {
         if (!dynamicText) {
           dynamicText = document.createElement('div');
-          dynamicText.classList.add('new-div');
+          dynamicText.id = 'task1OutsideText';
+          dynamicText.classList.add('new-div'); 
           dynamicText.textContent = 'Я новый элемент';
-          dynamicArea.appendChild(dynamicText);
+          document.body.appendChild(dynamicText); 
         }
       }
 
@@ -35,7 +37,7 @@
       if (action === 'remove-text') {
         if (dynamicText) {
           dynamicText.remove();
-          dynamicText = null; // чтобы кнопка 1 могла создать его заново
+          dynamicText = null; 
         }
       }
 
@@ -46,7 +48,7 @@
           paragraph.classList.add('card', 'card-content');
           paragraph.textContent = 'Это изменяемый абзац.';
 
-          // клик по самому абзацу переключает его туда-обратно
+          
           paragraph.addEventListener('click', function () {
             paragraphChanged = !paragraphChanged;
 
