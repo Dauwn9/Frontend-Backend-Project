@@ -8,6 +8,7 @@
   var dynamicArea = root.querySelector('#task1Dynamic');
   var dynamicText = null;   // элемент, которым управляют кнопки 1-3
   var paragraph = null;     // появится только после клика на кнопку 4
+  var paragraphChanged = false; // в каком сейчас состоянии абзац
 
   root.querySelectorAll('[data-action]').forEach(function (btn) {
     btn.addEventListener('click', function () {
@@ -38,16 +39,24 @@
         }
       }
 
-      // 4. Создать изменяемый абзац (по клику на сам абзац меняются цвет и размер)
+      // 4. Создать изменяемый абзац
       if (action === 'toggle-paragraph') {
         if (!paragraph) {
           paragraph = document.createElement('p');
           paragraph.classList.add('card', 'card-content');
           paragraph.textContent = 'Это изменяемый абзац.';
 
+          // клик по самому абзацу переключает его туда-обратно
           paragraph.addEventListener('click', function () {
-            paragraph.style.color = 'crimson';
-            paragraph.style.fontSize = '28px';
+            paragraphChanged = !paragraphChanged;
+
+            if (paragraphChanged) {
+              paragraph.style.color = 'crimson';
+              paragraph.style.fontSize = '28px';
+            } else {
+              paragraph.style.color = '';
+              paragraph.style.fontSize = '';
+            }
           });
 
           dynamicArea.appendChild(paragraph);
