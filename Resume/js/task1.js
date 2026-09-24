@@ -18,7 +18,7 @@
       if (action === 'add-text') {
         if (!dynamicText) {
           dynamicText = document.createElement('div');
-          dynamicText.classList.add('new-div', 'card', 'card-content');
+          dynamicText.classList.add('new-div');
           dynamicText.textContent = 'Я новый элемент';
           dynamicArea.appendChild(dynamicText);
         }
