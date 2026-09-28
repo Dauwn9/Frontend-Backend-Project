@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Task 3</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+  
+  <style>
+    #task3Root .task3-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+    #task3Root input[type="number"] {
+      width: 70px;
+      padding: 6px 8px;
+      font-size: 15px;
+    }
+    #task3Root button {
+      padding: 7px 14px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    #task3Root select {
+      padding: 6px 8px;
+      font-size: 14px;
+    }
+    #task3Root .task3-message {
+      margin-top: 10px;
+      color: #c62828;
+      min-height: 1.2em;
+    }
+    #task3Root .task3-result {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    #task3Root .task3-table-box {
+      overflow-x: auto;
+    }
+    #task3Root table {
+      border-collapse: collapse;
+      margin: 0 auto;
+    }
+    #task3Root td {
+      width: 44px;
+      height: 44px;
+      border: 1px solid #999;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.15s ease;
+    }
+  </style>
+
+  <div class="resume-container" id="task3Root">
+
+    <div class="card">
+      <h2>Создать таблицу</h2>
+      <div class="task3-controls">
+        <label>Строк: <input type="number" id="task3Rows" min="1" max="20" value="4"></label>
+        <label>Столбцов: <input type="number" id="task3Cols" min="1" max="20" value="5"></label>
+        <button type="button" id="task3Create">Создать таблицу</button>
+      </div>
+      <div class="task3-message" id="task3Message"></div>
+    </div>
+
+    <div class="card">
+      <h2>Таблица</h2>
+      <p>Кликайте по ячейкам — цвет меняется по кругу.</p>
+      <div class="task3-table-box" id="task3TableBox"></div>
+    </div>
+
+    <div class="card">
+      <h2>Подсчёт ячеек по цвету</h2>
+      <div class="task3-controls">
+        <select id="task3ColorSelect"></select>
+        <button type="button" id="task3Count">Посчитать</button>
+      </div>
+      <div class="task3-result" id="task3Result"></div>
+    </div>
+
+  </div>
+
+  <script src="../js/task3.js"></script>
+
+</body>
+</html>
