@@ -184,3 +184,17 @@ h1 {
     text-align: center;
     margin: 0;
 }
+#task2Btn {
+    background-color: #ddd;
+    color: black;
+    border: 2px solid #aaa;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+#task2Btn.active {
+    background-color: green;
+    color: white;
+    border-color: darkgreen;
+}
