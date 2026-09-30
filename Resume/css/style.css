@@ -198,3 +198,32 @@ h1 {
     color: white;
     border-color: darkgreen;
 }
+
+/* Task 4 Темная тема */
+
+body {
+    transition: background-color 0.3s, color 0.3s;
+}
+
+body.dark-theme {
+    background-color: #1e1e1e;
+    color: white;
+}
+
+body.dark-theme .card {
+    background-color: #2b2b2b;
+    color: white;
+}
+
+#themeButton {
+    padding: 10px 15px;
+    margin: 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+body.dark-theme #themeButton {
+    background-color: #444;
+    color: white;
+}
