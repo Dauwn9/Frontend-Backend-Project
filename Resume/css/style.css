@@ -1,16 +1,31 @@
-/* Общие стили */
+:root {
+  --bg: #f4f6f8;
+  --surface: #ffffff;       /* белый контейнер / карточки */
+  --surface-2: #f0f2f5;     /* подпись под фото, инпуты */
+  --text: #222222;
+  --text-muted: #666666;
+  --border: #cccccc;
+  --accent: #0a6cff;
+  --danger: #c62828;
+  --shadow: rgba(0, 0, 0, 0.15);
+}
 body {
   font-family: Arial, sans-serif;
-  background: #f0f2f5;
+
+  background: var(--bg);
+  color: var(--text);
+
   margin: 0;
   padding: 0;
+
+  transition:
+    background-color 0.3s,
+    color 0.3s;
 }
 
-h1, h2 {
-  color: #333;
-}
+h1, h2, h3 { color: var(--text); } 
 
-/* Заголовок */
+/* Заголовок */а
 h1 {
   text-align: center;
   padding: 20px;
@@ -28,9 +43,9 @@ h1 {
 
 /* Карточка */
 .card {
-  background: white;
+  background: var(--surface);
   border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 10px var(--shadow);
   width: 250px;
   overflow: hidden;
   transition: transform 0.2s ease;
@@ -56,13 +71,14 @@ h1 {
 
 .card-content a {
   text-decoration: none;
-  color: #007BFF;
+  color: var(--accent);
   font-weight: bold;
   font-size: 18px;
 }
 
 .card-content a:hover {
-  color: #0056b3;
+  color: var(--accent);
+  text-decoration: underline;
 }
 
 /* Секции резюме */
@@ -86,6 +102,7 @@ h1 {
 }
 
 .contact a:hover {
+  color: var(--accent);
   text-decoration: underline;
 }
 
@@ -118,7 +135,7 @@ h1 {
   display: flex;
   gap: 6px;
   justify-content: center;
-  border-bottom: 2px solid #dfe3e8;
+  border-bottom: 2px solid var(--border);
   margin-bottom: 24px;
 }
 
@@ -130,25 +147,25 @@ h1 {
   font-family: inherit;
   font-size: 16px;
   font-weight: bold;
-  color: #666;
+  color: var(--text-muted);
   cursor: pointer;
   position: relative;
   top: 2px;
 }
 
 .tabs__btn:hover {
-  color: #007BFF;
+  color: var(--accent);
 }
 
 .tabs__btn.is-active {
-  color: #007BFF;
-  border-bottom: 2px solid #007BFF;
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent);
 }
 
 .tabs__content {
-  background: white;
+  background: var(--surface);
   border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 10px var(--shadow);
   padding: 10px 25px;
   min-height: 150px;
 }
@@ -165,10 +182,10 @@ h1 {
 
 /* Карточки внутри резюме — на всю ширину */
 .resume-container .card {
-  width: 100%;
-  background: white;
+width: 100%;
+  background: var(--surface);
   border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 10px var(--shadow);
   padding: 25px;
   margin-bottom: 25px;
   box-sizing: border-box;
@@ -201,29 +218,66 @@ h1 {
 
 /* Task 4 Темная тема */
 
-body {
-    transition: background-color 0.3s, color 0.3s;
-}
+
 
 body.dark-theme {
-    background-color: #1e1e1e;
-    color: white;
+  --bg: #1e1e1e;
+  --surface: #2a2a2a;
+  --surface-2: #333333;
+  --text: #f1f1f1;
+  --text-muted: #aaaaaa;
+  --border: #555555;
+  --accent: #4d9bff;
+  --danger: #ff6b6b;
+  --shadow: rgba(0, 0, 0, 0.5);
 }
 
-body.dark-theme .card {
-    background-color: #2b2b2b;
-    color: white;
-}
+
 
 #themeButton {
-    padding: 10px 15px;
-    margin: 15px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
+  padding: 10px 15px;
+  margin: 15px;
+
+  border: 1px solid var(--border);
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  background: var(--surface-2);
+  color: var(--text);
+
+  transition:
+    background-color 0.3s,
+    color 0.3s,
+    border-color 0.3s;
 }
 
-body.dark-theme #themeButton {
-    background-color: #444;
-    color: white;
+
+
+.resume-container,
+.content,
+.card {
+  background: var(--surface);
+  color: var(--text);
+
+  box-shadow: 0 2px 8px var(--shadow);
+
+  transition:
+    background-color 0.3s,
+    color 0.3s,
+    box-shadow 0.3s;
+}
+
+.nav a { color: var(--text-muted); }
+.nav a.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+input, select, button {
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+h1 {
+  text-align: center !important;
+  width: 100%;
+  box-sizing: border-box;
 }

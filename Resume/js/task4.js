@@ -1,13 +1,29 @@
 const themeButton = document.getElementById("themeButton");
 
-if (themeButton) {
-    themeButton.addEventListener("click", function () {
-        document.body.classList.toggle("dark-theme");
+function applyTheme(isDark) {
+    document.body.classList.toggle("dark-theme", isDark);
 
-        if (document.body.classList.contains("dark-theme")) {
-            themeButton.textContent = "Светлая тема";
-        } else {
-            themeButton.textContent = "Темная тема";
-        }
-    });
+    if (isDark) {
+        themeButton.textContent = "Светлая тема";
+    } else {
+        themeButton.textContent = "Темная тема";
+    }
 }
+
+// Загружаем сохранённую тему
+const savedTheme = localStorage.getItem("theme");
+
+applyTheme(savedTheme === "dark");
+
+// Нажатие на кнопку
+themeButton.addEventListener("click", function () {
+
+    const isDark = document.body.classList.contains("dark-theme");
+
+    applyTheme(!isDark);
+
+    localStorage.setItem(
+        "theme",
+        !isDark ? "dark" : "light"
+    );
+});
