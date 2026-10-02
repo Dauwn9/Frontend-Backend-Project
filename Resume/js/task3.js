@@ -13,22 +13,12 @@
     { name: 'Жёлтый',  value: '#ffee58' }
   ];
 
-  var rowsInput   = root.querySelector('#task3Rows');
-  var colsInput   = root.querySelector('#task3Cols');
-  var createBtn   = root.querySelector('#task3Create');
-  var message     = root.querySelector('#task3Message');
-  var tableBox    = root.querySelector('#task3TableBox');
-  var colorSelect = root.querySelector('#task3ColorSelect');
-  var countBtn    = root.querySelector('#task3Count');
-  var result      = root.querySelector('#task3Result');
-
-  // Заполняем выпадающий список цветами из палитры
-  PALETTE.forEach(function (color, index) {
-    var option = document.createElement('option');
-    option.value = index;
-    option.textContent = color.name;
-    colorSelect.appendChild(option);
-  });
+  var rowsInput  = root.querySelector('#task3Rows');
+  var colsInput  = root.querySelector('#task3Cols');
+  var createBtn  = root.querySelector('#task3Create');
+  var message    = root.querySelector('#task3Message');
+  var tableBox   = root.querySelector('#task3TableBox');
+  var liveCounts = root.querySelector('#task3LiveCounts');
 
   // Превращает значение поля ввода в число от 1 до MAX_SIZE, иначе возвращает null
   function readSize(input) {
@@ -63,6 +53,19 @@
     return tableBox.querySelectorAll('td[data-color="' + colorIndex + '"]').length;
   }
 
+  // Пересчитывает количество ячеек каждого цвета и сразу выводит внизу,
+  // например: "Белый: 12". Вызывается после создания таблицы и после каждого клика.
+  function updateLiveCounts() {
+    liveCounts.innerHTML = '';
+
+    PALETTE.forEach(function (color, index) {
+      var total = countCells(index);
+      var span = document.createElement('span');
+      span.textContent = color.name + ': ' + total;
+      liveCounts.appendChild(span);
+    });
+  }
+
   createBtn.addEventListener('click', function () {
     var rows = readSize(rowsInput);
     var cols = readSize(colsInput);
@@ -73,8 +76,8 @@
     }
 
     message.textContent = '';
-    result.textContent = '';
     generateTable(rows, cols);
+    updateLiveCounts();
   });
 
   // Один обработчик на весь контейнер таблицы (делегирование событий):
@@ -86,16 +89,6 @@
     var next = (Number(cell.dataset.color) + 1) % PALETTE.length;
     cell.dataset.color = next;
     cell.style.backgroundColor = PALETTE[next].value;
-  });
-
-  countBtn.addEventListener('click', function () {
-    if (!tableBox.querySelector('table')) {
-      result.textContent = 'Сначала создайте таблицу.';
-      return;
-    }
-
-    var index = Number(colorSelect.value);
-    var total = countCells(index);
-    result.textContent = 'Ячеек цвета «' + PALETTE[index].name + '»: ' + total;
+    updateLiveCounts();
   });
 })();

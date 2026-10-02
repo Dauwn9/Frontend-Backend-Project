@@ -7,7 +7,8 @@
 </head>
 <body>
 
-  
+  <!-- Стили лежат внутри body, чтобы они подхватились и при подгрузке во вкладку
+       (tabs.js берёт из файла только содержимое body) -->
   <style>
     #task3Root .task3-controls {
       display: flex;
@@ -25,18 +26,19 @@
       font-size: 14px;
       cursor: pointer;
     }
-    #task3Root select {
-      padding: 6px 8px;
-      font-size: 14px;
-    }
     #task3Root .task3-message {
       margin-top: 10px;
       color: #c62828;
       min-height: 1.2em;
     }
-    #task3Root .task3-result {
-      margin-top: 10px;
-      font-weight: bold;
+    #task3Root .task3-live-counts {
+      margin-top: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 18px;
+    }
+    #task3Root .task3-live-counts span {
+      font-size: 14px;
     }
     #task3Root .task3-table-box {
       overflow-x: auto;
@@ -71,21 +73,12 @@
       <h2>Таблица</h2>
       <p>Кликайте по ячейкам — цвет меняется по кругу.</p>
       <div class="task3-table-box" id="task3TableBox"></div>
-    </div>
-
-    <div class="card">
-      <h2>Подсчёт ячеек по цвету</h2>
-      <div class="task3-controls">
-        <select id="task3ColorSelect"></select>
-        <button type="button" id="task3Count">Посчитать</button>
-      </div>
-      <div class="task3-result" id="task3Result"></div>
+      <div class="task3-live-counts" id="task3LiveCounts"></div>
     </div>
 
   </div>
 
   <script src="../js/task3.js"></script>
-  <script src="../js/task4.js"></script>
 
 </body>
 </html>
