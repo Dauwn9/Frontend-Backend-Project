@@ -48,13 +48,11 @@
     tableBox.appendChild(table);
   }
 
-  // Подсчёт ячеек определённого цвета (по индексу в палитре)
   function countCells(colorIndex) {
     return tableBox.querySelectorAll('td[data-color="' + colorIndex + '"]').length;
   }
 
-  // Пересчитывает количество ячеек каждого цвета и сразу выводит внизу,
-  // например: "Белый: 12". Вызывается после создания таблицы и после каждого клика.
+
   function updateLiveCounts() {
     liveCounts.innerHTML = '';
 
@@ -80,8 +78,7 @@
     updateLiveCounts();
   });
 
-  // Один обработчик на весь контейнер таблицы (делегирование событий):
-  // не нужно вешать отдельный обработчик на каждую ячейку
+
   tableBox.addEventListener('click', function (e) {
     var cell = e.target.closest('td');
     if (!cell) return;
