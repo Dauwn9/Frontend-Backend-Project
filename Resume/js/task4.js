@@ -1,5 +1,11 @@
-// ЧЕЛОВЕК 2: Update (добавляется поверх части Create+Read от человека 1)
-// Фейковый API: https://dummyjson.com/docs/todos
+// ЧЕЛОВЕК 3: Delete (добавляется поверх части Update от человека 2)
+// CRUD-таск-менеджер на фейковом API https://dummyjson.com/docs/todos
+//
+// Важно: DummyJSON ничего реально не сохраняет на сервере. POST/PUT/DELETE
+// честно отвечают "как будто всё получилось" (с правильным id, текстом и т.д.),
+// но при повторном GET сервер снова отдаст исходные данные. Поэтому мы держим
+// свою копию списка в переменной todos и правим именно её — сервер используем
+// только чтобы по-настоящему СДЕЛАТЬ запрос нужного типа (этого требует задание).
 (function () {
   var root = document.getElementById('crudRoot');
   if (!root) return;
@@ -11,7 +17,7 @@
   var message      = root.querySelector('#crudMessage');
   var list         = root.querySelector('#crudList');
 
-  var todos = []; // локальная копия списка задач
+  var todos = []; // наша локальная копия списка задач
 
   function showMessage(text, isError) {
     message.textContent = text;
@@ -29,7 +35,7 @@
         return res.json();
       })
       .then(function (data) {
-        todos = data.todos;
+        todos = data.todos; // у каждого объекта есть id, todo (текст), completed
         showMessage('');
         renderList();
       })
@@ -38,9 +44,7 @@
       });
   }
 
-  // Отрисовывает список. Чекбокс теперь реально переключает "выполнено",
-  // добавлена кнопка "Изменить" для редактирования текста.
-  // Кнопки "Удалить" пока нет — её добавит человек 3.
+  // Отрисовывает весь список заново на основе массива todos
   function renderList() {
     list.innerHTML = '';
 
@@ -67,9 +71,17 @@
         startEdit(li, item);
       });
 
+      var deleteBtn = document.createElement('button');
+      deleteBtn.type = 'button';
+      deleteBtn.textContent = 'Удалить';
+      deleteBtn.addEventListener('click', function () {
+        deleteTodo(item.id);
+      });
+
       li.appendChild(checkbox);
       li.appendChild(text);
       li.appendChild(editBtn);
+      li.appendChild(deleteBtn);
       list.appendChild(li);
     });
   }
@@ -97,6 +109,7 @@
         return res.json();
       })
       .then(function (created) {
+        // сервер вернул объект с "новым" id — добавляем его в наш локальный список
         todos.push(created);
         renderList();
         newTextInput.value = '';
@@ -120,6 +133,7 @@
         return res.json();
       })
       .then(function () {
+        // обновляем локальную копию у нужной задачи
         var item = todos.find(function (t) { return t.id === id; });
         if (item) item.completed = completed;
         renderList();
@@ -148,7 +162,7 @@
     var cancelBtn = document.createElement('button');
     cancelBtn.type = 'button';
     cancelBtn.textContent = 'Отмена';
-    cancelBtn.addEventListener('click', renderList);
+    cancelBtn.addEventListener('click', renderList); // просто перерисовать как было
 
     li.appendChild(input);
     li.appendChild(saveBtn);
@@ -179,6 +193,23 @@
       })
       .catch(function (err) {
         showMessage('Не удалось сохранить изменения: ' + err.message, true);
+      });
+  }
+
+  // ---------- DELETE: удаление задачи ----------
+
+  function deleteTodo(id) {
+    fetch(API_BASE + '/' + id, { method: 'DELETE' })
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function () {
+        todos = todos.filter(function (t) { return t.id !== id; });
+        renderList();
+      })
+      .catch(function (err) {
+        showMessage('Не удалось удалить задачу: ' + err.message, true);
       });
   }
 
