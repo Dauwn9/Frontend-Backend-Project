@@ -102,12 +102,12 @@ var nextLocalId = -1;
         return res.json();
       })
       .then(function (created) {
-         var newTodo = {
-    id: nextLocalId--,
-    todo: text,
-    completed: false,
-    userId: 1
-  };
+      var newTodo = {
+  id: nextLocalId--,
+  todo: text,
+  completed: false,
+  userId: 1
+};
 
   todos.push(newTodo);
   renderList();
@@ -159,34 +159,6 @@ function toggleComplete(id, completed) {
       renderList();
     });
 }
-
-  // ---------- UPDATE: редактирование текста ----------
-
-  function startEdit(li, item) {
-    li.innerHTML = '';
-
-    var input = document.createElement('input');
-    input.type = 'text';
-    input.value = item.todo;
-
-    var saveBtn = document.createElement('button');
-    saveBtn.type = 'button';
-    saveBtn.textContent = 'Сохранить';
-    saveBtn.addEventListener('click', function () {
-      saveEdit(item.id, input.value.trim());
-    });
-
-    var cancelBtn = document.createElement('button');
-    cancelBtn.type = 'button';
-    cancelBtn.textContent = 'Отмена';
-    cancelBtn.addEventListener('click', renderList); // просто перерисовать как было
-
-    li.appendChild(input);
-    li.appendChild(saveBtn);
-    li.appendChild(cancelBtn);
-    input.focus();
-  }
-
 function saveEdit(id, newText) {
   if (!newText) {
     showMessage('Текст задачи не может быть пустым.', true);
@@ -199,7 +171,7 @@ function saveEdit(id, newText) {
 
   if (!item) return;
 
-  // Если задача создана локально
+  // Если задача новая и хранится локально
   if (id < 0) {
     item.todo = newText;
     showMessage('');
@@ -223,14 +195,11 @@ function saveEdit(id, newText) {
       renderList();
     })
     .catch(function (err) {
-      showMessage(
-        'Не удалось сохранить изменения: ' + err.message,
-        true
-      );
+      showMessage('Не удалось сохранить изменения: ' + err.message, true);
     });
 }
 
-  // ---------- DELETE: удаление задачи ----------
+
 
 function deleteTodo(id) {
 
