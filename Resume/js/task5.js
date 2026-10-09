@@ -5,6 +5,7 @@
   var API_BASE = 'https://dummyjson.com/todos';
 
   var newTextInput = root.querySelector('#crudNewText');
+  var userIdInput = root.querySelector('#crudUserId');
   var addBtn       = root.querySelector('#crudAddBtn');
   var message      = root.querySelector('#crudMessage');
   var list         = root.querySelector('#crudList');
@@ -55,7 +56,8 @@ var nextLocalId = -1;
 
       var text = document.createElement('span');
       text.className = 'crud-item-text';
-      text.textContent = item.todo;
+      text.textContent =
+        item.todo + ' (User ID: ' + item.userId + ')';
 
       var editBtn = document.createElement('button');
       editBtn.type = 'button';
@@ -111,32 +113,61 @@ var nextLocalId = -1;
   // ---------- CREATE: добавление новой задачи ----------
 
   function addTodo() {
-    var text = newTextInput.value.trim();
-    if (!text) {
-      showMessage('Введите текст задачи.', true);
-      return;
-    }
+  var text = newTextInput.value.trim();
+  var userId = Number(userIdInput.value);
 
-    fetch(API_BASE + '/add', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+  if (!text) {
+    showMessage('Введите текст задачи.', true);
+    return;
+  }
+
+  if (!userId) {
+    showMessage('Введите User ID.', true);
+    return;
+  }
+
+  fetch(API_BASE + '/add', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      todo: text,
+      completed: false,
+      userId: userId
+    })
+  })
+    .then(function (res) {
+      if (!res.ok) {
+        throw new Error('HTTP ' + res.status);
+      }
+      return res.json();
+    })
+    .then(function () {
+
+      var newTodo = {
+        id: nextLocalId--,
         todo: text,
         completed: false,
-        userId: 1
-      })
+        userId: userId
+      };
+
+      todos.push(newTodo);
+
+      renderList();
+
+      newTextInput.value = '';
+      userIdInput.value = '';
+
+      showMessage('');
     })
-      .then(function (res) {
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        return res.json();
-      })
-      .then(function () {
-      var newTodo = {
-  id: nextLocalId--,
-  todo: text,
-  completed: false,
-  userId: 1
-};
+    .catch(function (err) {
+      showMessage(
+        'Не удалось добавить задачу: ' + err.message,
+        true
+      );
+    });
+}
 
   todos.push(newTodo);
   renderList();
