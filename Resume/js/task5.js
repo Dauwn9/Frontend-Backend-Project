@@ -78,6 +78,35 @@ var nextLocalId = -1;
       list.appendChild(li);
     });
   }
+  
+  function startEdit(li, item) {
+  li.innerHTML = '';
+
+  var input = document.createElement('input');
+  input.type = 'text';
+  input.value = item.todo;
+
+  var saveBtn = document.createElement('button');
+  saveBtn.type = 'button';
+  saveBtn.textContent = 'Сохранить';
+
+  saveBtn.addEventListener('click', function () {
+    saveEdit(item.id, input.value.trim());
+  });
+
+  var cancelBtn = document.createElement('button');
+  cancelBtn.type = 'button';
+  cancelBtn.textContent = 'Отмена';
+
+  cancelBtn.addEventListener('click', renderList);
+
+  li.appendChild(input);
+  li.appendChild(saveBtn);
+  li.appendChild(cancelBtn);
+
+  input.focus();
+}
+  
 
   // ---------- CREATE: добавление новой задачи ----------
 
@@ -101,7 +130,7 @@ var nextLocalId = -1;
         if (!res.ok) throw new Error('HTTP ' + res.status);
         return res.json();
       })
-      .then(function (created) {
+      .then(function () {
       var newTodo = {
   id: nextLocalId--,
   todo: text,
