@@ -17,6 +17,24 @@
     message.classList.toggle('is-error', !!isError);
   }
 
+  // Отправляет запрос и возвращает { method, url, status, data } —
+  // то же самое, что видно в DevTools (Network)
+  function sendRequest(method, url, body) {
+    var options = { method: method };
+
+    if (body) {
+      options.headers = { 'Content-Type': 'application/json' };
+      options.body = JSON.stringify(body);
+    }
+
+    return fetch(url, options).then(function (res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json().then(function (data) {
+        return { method: method, url: url, status: res.status, data: data };
+      });
+    });
+  }
+
   // ---------- МОДАЛЬНОЕ ОКНО (стили в style.css) ----------
 
   var overlay = document.createElement('div');
@@ -32,6 +50,7 @@
         '<input type="number" id="crudModalUserId" min="1">' +
       '</label>' +
       '<div class="crud-modal-error" id="crudModalError"></div>' +
+      '<pre class="crud-modal-response" id="crudModalResponse" hidden></pre>' +
       '<div class="crud-modal-actions">' +
         '<button type="button" id="crudModalCancel">Отмена</button>' +
         '<button type="button" id="crudModalSave">Сохранить</button>' +
@@ -39,12 +58,13 @@
     '</div>';
   root.appendChild(overlay);
 
-  var modalTitle  = overlay.querySelector('#crudModalTitle');
-  var modalText   = overlay.querySelector('#crudModalText');
-  var modalUserId = overlay.querySelector('#crudModalUserId');
-  var modalError  = overlay.querySelector('#crudModalError');
-  var modalSave   = overlay.querySelector('#crudModalSave');
-  var modalCancel = overlay.querySelector('#crudModalCancel');
+  var modalTitle    = overlay.querySelector('#crudModalTitle');
+  var modalText     = overlay.querySelector('#crudModalText');
+  var modalUserId   = overlay.querySelector('#crudModalUserId');
+  var modalError    = overlay.querySelector('#crudModalError');
+  var modalResponse = overlay.querySelector('#crudModalResponse');
+  var modalSave     = overlay.querySelector('#crudModalSave');
+  var modalCancel   = overlay.querySelector('#crudModalCancel');
 
   // item = объект задачи (изменение) или undefined (добавление)
   function openModal(item) {
@@ -53,7 +73,11 @@
     modalText.value   = item ? item.todo : '';
     modalUserId.value = item ? item.userId : '';
     modalError.textContent = '';
+    modalResponse.hidden = true;
+    modalResponse.textContent = '';
+    modalSave.hidden = false;
     modalSave.disabled = false;
+    modalCancel.textContent = 'Отмена';
     overlay.hidden = false;
     modalText.focus();
   }
@@ -61,6 +85,16 @@
   function closeModal() {
     overlay.hidden = true;
     editingId = null;
+  }
+
+  // показывает в окне запрос и ответ сервера (как в логе Network)
+  function showResponse(log) {
+    modalResponse.textContent =
+      log.method + ' ' + log.url + ' (' + log.status + ')\n\n' +
+      JSON.stringify(log.data, null, 2);
+    modalResponse.hidden = false;
+    modalSave.hidden = true;
+    modalCancel.textContent = 'Закрыть';
   }
 
   function submitModal() {
@@ -84,10 +118,10 @@
       : updateTodo(editingId, text, userId);
 
     request
-      .then(function () {
-        closeModal();
+      .then(function (log) {
         showMessage('');
         renderList();
+        showResponse(log);
       })
       .catch(function (err) {
         modalError.textContent = 'Ошибка: ' + err.message;
@@ -106,7 +140,7 @@
 
   // Enter = сохранить, Esc = закрыть
   overlay.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') submitModal();
+    if (e.key === 'Enter' && !modalSave.hidden) submitModal();
     if (e.key === 'Escape') closeModal();
   });
 
@@ -172,31 +206,23 @@
   }
 
   // ---------- CREATE ----------
-  // возвращает промис; ошибки обрабатывает submitModal
+  // возвращает промис с { method, url, status, data }
 
   function createTodo(text, userId) {
-    return fetch(API_BASE + '/add', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    return sendRequest('POST', API_BASE + '/add', {
+      todo: text,
+      completed: false,
+      userId: userId
+    }).then(function (log) {
+      // dummyjson ничего не сохраняет, поэтому добавляем в локальный список сами
+      todos.push({
+        id: nextLocalId--,
         todo: text,
         completed: false,
         userId: userId
-      })
-    })
-      .then(function (res) {
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        return res.json();
-      })
-      .then(function () {
-        // dummyjson ничего не сохраняет, поэтому добавляем в локальный список сами
-        todos.push({
-          id: nextLocalId--,
-          todo: text,
-          completed: false,
-          userId: userId
-        });
       });
+      return log;
+    });
   }
 
   // ---------- UPDATE: название и User ID ----------
@@ -208,27 +234,29 @@
 
     if (!item) return Promise.reject(new Error('задача не найдена'));
 
-    // Если задача создана локально
+    // Если задача создана локально: на сервере её нет, поэтому PUT вернул бы 404.
+    // Отправляем POST /add (dummyjson его симулирует)
     if (id < 0) {
-      item.todo = text;
-      item.userId = userId;
-      return Promise.resolve();
+      return sendRequest('POST', API_BASE + '/add', {
+        todo: text,
+        completed: item.completed,
+        userId: userId
+      }).then(function (log) {
+        item.todo = text;
+        item.userId = userId;
+        return log;
+      });
     }
 
     // Если задача загружена с сервера
-    return fetch(API_BASE + '/' + id, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ todo: text, userId: userId })
-    })
-      .then(function (res) {
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        return res.json();
-      })
-      .then(function () {
-        item.todo = text;
-        item.userId = userId;
-      });
+    return sendRequest('PUT', API_BASE + '/' + id, {
+      todo: text,
+      userId: userId
+    }).then(function (log) {
+      item.todo = text;
+      item.userId = userId;
+      return log;
+    });
   }
 
   // ---------- UPDATE: отметка "выполнено" ----------
@@ -247,15 +275,7 @@
       return;
     }
 
-    fetch(API_BASE + '/' + id, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ completed: completed })
-    })
-      .then(function (res) {
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        return res.json();
-      })
+    sendRequest('PUT', API_BASE + '/' + id, { completed: completed })
       .then(function () {
         item.completed = completed;
         renderList();
@@ -279,11 +299,7 @@
       return;
     }
 
-    fetch(API_BASE + '/' + id, { method: 'DELETE' })
-      .then(function (res) {
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        return res.json();
-      })
+    sendRequest('DELETE', API_BASE + '/' + id)
       .then(function () {
         todos = todos.filter(function (t) {
           return t.id !== id;

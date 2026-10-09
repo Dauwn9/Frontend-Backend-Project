@@ -372,3 +372,19 @@ h1 {
   justify-content: flex-end;
   margin-top: 8px;
 }
+#crudRoot .crud-modal-response {
+  margin: 8px 0 0;
+  padding: 10px;
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  max-height: 220px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+#crudRoot .crud-modal-response[hidden] {
+  display: none;
+}
