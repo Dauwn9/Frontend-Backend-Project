@@ -2,7 +2,8 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Task 4</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task 4 — Список задач</title>
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
@@ -10,22 +11,9 @@
   <div class="resume-container" id="crudRoot">
 
     <div class="card">
-      <h2>Новая задача</h2>
-      <div class="crud-form">
-    <input type="text"
-           id="crudNewText"
-           placeholder="Что нужно сделать?">
-
-    <input type="number"
-           id="crudUserId"
-           placeholder="User ID">
-
-    <button type="button"
-            id="crudAddBtn">
-        Добавить
-    </button>
-      </div>
-      <div class="crud-message" id="crudMessage"></div>
+      <h2>Задачи</h2>
+      <button type="button" id="crudAddBtn">Добавить задачу</button>
+      <p class="crud-message" id="crudMessage"></p>
     </div>
 
     <div class="card">
@@ -36,6 +24,5 @@
   </div>
 
   <script src="../js/task5.js"></script>
-
 </body>
 </html>

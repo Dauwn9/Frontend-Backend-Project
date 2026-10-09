@@ -4,19 +4,111 @@
 
   var API_BASE = 'https://dummyjson.com/todos';
 
-  var newTextInput = root.querySelector('#crudNewText');
-  var userIdInput  = root.querySelector('#crudUserId');
-  var addBtn       = root.querySelector('#crudAddBtn');
-  var message      = root.querySelector('#crudMessage');
-  var list         = root.querySelector('#crudList');
+  var addBtn  = root.querySelector('#crudAddBtn');
+  var message = root.querySelector('#crudMessage');
+  var list    = root.querySelector('#crudList');
 
-  var todos = []; // наша локальная копия списка задач
-  var nextLocalId = -1; // отрицательные id у задач, созданных локально
+  var todos = [];          // локальная копия списка задач
+  var nextLocalId = -1;    // отрицательные id у задач, созданных локально
+  var editingId = null;    // null = добавление, число = изменение задачи с этим id
 
   function showMessage(text, isError) {
     message.textContent = text;
     message.classList.toggle('is-error', !!isError);
   }
+
+  // ---------- МОДАЛЬНОЕ ОКНО (стили в style.css) ----------
+
+  var overlay = document.createElement('div');
+  overlay.className = 'crud-modal';
+  overlay.hidden = true;
+  overlay.innerHTML =
+    '<div class="crud-modal-box">' +
+      '<h3 id="crudModalTitle"></h3>' +
+      '<label>Название задачи' +
+        '<input type="text" id="crudModalText" placeholder="Что нужно сделать?">' +
+      '</label>' +
+      '<label>User ID' +
+        '<input type="number" id="crudModalUserId" min="1">' +
+      '</label>' +
+      '<div class="crud-modal-error" id="crudModalError"></div>' +
+      '<div class="crud-modal-actions">' +
+        '<button type="button" id="crudModalCancel">Отмена</button>' +
+        '<button type="button" id="crudModalSave">Сохранить</button>' +
+      '</div>' +
+    '</div>';
+  root.appendChild(overlay);
+
+  var modalTitle  = overlay.querySelector('#crudModalTitle');
+  var modalText   = overlay.querySelector('#crudModalText');
+  var modalUserId = overlay.querySelector('#crudModalUserId');
+  var modalError  = overlay.querySelector('#crudModalError');
+  var modalSave   = overlay.querySelector('#crudModalSave');
+  var modalCancel = overlay.querySelector('#crudModalCancel');
+
+  // item = объект задачи (изменение) или undefined (добавление)
+  function openModal(item) {
+    editingId = item ? item.id : null;
+    modalTitle.textContent = item ? 'Изменить задачу' : 'Новая задача';
+    modalText.value   = item ? item.todo : '';
+    modalUserId.value = item ? item.userId : '';
+    modalError.textContent = '';
+    modalSave.disabled = false;
+    overlay.hidden = false;
+    modalText.focus();
+  }
+
+  function closeModal() {
+    overlay.hidden = true;
+    editingId = null;
+  }
+
+  function submitModal() {
+    var text = modalText.value.trim();
+    var userId = Number(modalUserId.value);
+
+    if (!text) {
+      modalError.textContent = 'Введите название задачи.';
+      return;
+    }
+    if (!userId) {
+      modalError.textContent = 'Введите User ID.';
+      return;
+    }
+
+    modalError.textContent = '';
+    modalSave.disabled = true;
+
+    var request = editingId === null
+      ? createTodo(text, userId)
+      : updateTodo(editingId, text, userId);
+
+    request
+      .then(function () {
+        closeModal();
+        showMessage('');
+        renderList();
+      })
+      .catch(function (err) {
+        modalError.textContent = 'Ошибка: ' + err.message;
+        modalSave.disabled = false;
+      });
+  }
+
+  addBtn.addEventListener('click', function () { openModal(); });
+  modalCancel.addEventListener('click', closeModal);
+  modalSave.addEventListener('click', submitModal);
+
+  // клик по тёмному фону закрывает окно
+  overlay.addEventListener('click', function (e) {
+    if (e.target === overlay) closeModal();
+  });
+
+  // Enter = сохранить, Esc = закрыть
+  overlay.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') submitModal();
+    if (e.key === 'Escape') closeModal();
+  });
 
   // ---------- READ: загрузка списка ----------
 
@@ -29,7 +121,7 @@
         return res.json();
       })
       .then(function (data) {
-        todos = data.todos; // у каждого объекта есть id, todo (текст), completed
+        todos = data.todos;
         showMessage('');
         renderList();
       })
@@ -38,7 +130,6 @@
       });
   }
 
-  // Отрисовывает весь список заново на основе массива todos
   function renderList() {
     list.innerHTML = '';
 
@@ -62,7 +153,7 @@
       editBtn.type = 'button';
       editBtn.textContent = 'Изменить';
       editBtn.addEventListener('click', function () {
-        startEdit(li, item);
+        openModal(item);
       });
 
       var deleteBtn = document.createElement('button');
@@ -80,49 +171,11 @@
     });
   }
 
-  function startEdit(li, item) {
-    li.innerHTML = '';
+  // ---------- CREATE ----------
+  // возвращает промис; ошибки обрабатывает submitModal
 
-    var input = document.createElement('input');
-    input.type = 'text';
-    input.value = item.todo;
-
-    var saveBtn = document.createElement('button');
-    saveBtn.type = 'button';
-    saveBtn.textContent = 'Сохранить';
-    saveBtn.addEventListener('click', function () {
-      saveEdit(item.id, input.value.trim());
-    });
-
-    var cancelBtn = document.createElement('button');
-    cancelBtn.type = 'button';
-    cancelBtn.textContent = 'Отмена';
-    cancelBtn.addEventListener('click', renderList);
-
-    li.appendChild(input);
-    li.appendChild(saveBtn);
-    li.appendChild(cancelBtn);
-
-    input.focus();
-  }
-
-  // ---------- CREATE: добавление новой задачи ----------
-
-  function addTodo() {
-    var text = newTextInput.value.trim();
-    var userId = Number(userIdInput.value);
-
-    if (!text) {
-      showMessage('Введите текст задачи.', true);
-      return;
-    }
-
-    if (!userId) {
-      showMessage('Введите User ID.', true);
-      return;
-    }
-
-    fetch(API_BASE + '/add', {
+  function createTodo(text, userId) {
+    return fetch(API_BASE + '/add', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -136,24 +189,45 @@
         return res.json();
       })
       .then(function () {
-        // dummyjson ничего не сохраняет, поэтому добавляем задачу
-        // в локальный список сами, с введённым userId
-        var newTodo = {
+        // dummyjson ничего не сохраняет, поэтому добавляем в локальный список сами
+        todos.push({
           id: nextLocalId--,
           todo: text,
           completed: false,
           userId: userId
-        };
+        });
+      });
+  }
 
-        todos.push(newTodo);
-        renderList();
+  // ---------- UPDATE: название и User ID ----------
 
-        newTextInput.value = '';
-        userIdInput.value = '';
-        showMessage('');
+  function updateTodo(id, text, userId) {
+    var item = todos.find(function (t) {
+      return t.id === id;
+    });
+
+    if (!item) return Promise.reject(new Error('задача не найдена'));
+
+    // Если задача создана локально
+    if (id < 0) {
+      item.todo = text;
+      item.userId = userId;
+      return Promise.resolve();
+    }
+
+    // Если задача загружена с сервера
+    return fetch(API_BASE + '/' + id, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ todo: text, userId: userId })
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
       })
-      .catch(function (err) {
-        showMessage('Не удалось добавить задачу: ' + err.message, true);
+      .then(function () {
+        item.todo = text;
+        item.userId = userId;
       });
   }
 
@@ -166,7 +240,6 @@
 
     if (!item) return;
 
-    // Если задача создана локально
     if (id < 0) {
       item.completed = completed;
       renderList();
@@ -174,7 +247,6 @@
       return;
     }
 
-    // Если задача загружена с сервера
     fetch(API_BASE + '/' + id, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -195,52 +267,9 @@
       });
   }
 
-  // ---------- UPDATE: изменение текста ----------
-
-  function saveEdit(id, newText) {
-    if (!newText) {
-      showMessage('Текст задачи не может быть пустым.', true);
-      return;
-    }
-
-    var item = todos.find(function (t) {
-      return t.id === id;
-    });
-
-    if (!item) return;
-
-    // Если задача новая и хранится локально
-    if (id < 0) {
-      item.todo = newText;
-      showMessage('');
-      renderList();
-      return;
-    }
-
-    // Если задача загружена с сервера
-    fetch(API_BASE + '/' + id, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ todo: newText })
-    })
-      .then(function (res) {
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        return res.json();
-      })
-      .then(function () {
-        item.todo = newText;
-        showMessage('');
-        renderList();
-      })
-      .catch(function (err) {
-        showMessage('Не удалось сохранить изменения: ' + err.message, true);
-      });
-  }
-
-  // ---------- DELETE: удаление ----------
+  // ---------- DELETE ----------
 
   function deleteTodo(id) {
-    // Если задача создана локально
     if (id < 0) {
       todos = todos.filter(function (t) {
         return t.id !== id;
@@ -250,7 +279,6 @@
       return;
     }
 
-    // Если задача загружена с сервера
     fetch(API_BASE + '/' + id, { method: 'DELETE' })
       .then(function (res) {
         if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -266,11 +294,6 @@
         showMessage('Не удалось удалить задачу: ' + err.message, true);
       });
   }
-
-  addBtn.addEventListener('click', addTodo);
-  newTextInput.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') addTodo();
-  });
 
   loadTodos();
 })();
