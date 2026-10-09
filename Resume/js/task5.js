@@ -1,4 +1,3 @@
-// Фейковый API: https://dummyjson.com/docs/todos
 (function () {
   var root = document.getElementById('crudRoot');
   if (!root) return;
@@ -10,7 +9,7 @@
   var message      = root.querySelector('#crudMessage');
   var list         = root.querySelector('#crudList');
 
-  var todos = []; // локальная копия списка задач
+  var todos = []; // наша локальная копия списка задач
 
   function showMessage(text, isError) {
     message.textContent = text;
@@ -28,7 +27,7 @@
         return res.json();
       })
       .then(function (data) {
-        todos = data.todos; // у каждого объекта: id, todo (текст), completed
+        todos = data.todos; // у каждого объекта есть id, todo (текст), completed
         showMessage('');
         renderList();
       })
@@ -37,10 +36,7 @@
       });
   }
 
-  // Отрисовывает список заново на основе массива todos.
-  // Чекбокс пока только для отображения (disabled) — отметку "выполнено"
-  // добавит человек 2 в блоке Update. Кнопок "Изменить"/"Удалить" тоже
-  // пока нет — их добавят следующие части.
+  // Отрисовывает весь список заново на основе массива todos
   function renderList() {
     list.innerHTML = '';
 
@@ -52,14 +48,32 @@
       var checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
       checkbox.checked = item.completed;
-      checkbox.disabled = true; // временно, пока не подключили Update
+      checkbox.addEventListener('change', function () {
+        toggleComplete(item.id, checkbox.checked);
+      });
 
       var text = document.createElement('span');
       text.className = 'crud-item-text';
       text.textContent = item.todo;
 
+      var editBtn = document.createElement('button');
+      editBtn.type = 'button';
+      editBtn.textContent = 'Изменить';
+      editBtn.addEventListener('click', function () {
+        startEdit(li, item);
+      });
+
+      var deleteBtn = document.createElement('button');
+      deleteBtn.type = 'button';
+      deleteBtn.textContent = 'Удалить';
+      deleteBtn.addEventListener('click', function () {
+        deleteTodo(item.id);
+      });
+
       li.appendChild(checkbox);
       li.appendChild(text);
+      li.appendChild(editBtn);
+      li.appendChild(deleteBtn);
       list.appendChild(li);
     });
   }
@@ -87,13 +101,107 @@
         return res.json();
       })
       .then(function (created) {
-        todos.push(created); // сервер вернул объект с "новым" id
+        // сервер вернул объект с "новым" id — добавляем его в наш локальный список
+        todos.push(created);
         renderList();
         newTextInput.value = '';
         showMessage('');
       })
       .catch(function (err) {
         showMessage('Не удалось добавить задачу: ' + err.message, true);
+      });
+  }
+
+  // ---------- UPDATE: отметка "выполнено" ----------
+
+  function toggleComplete(id, completed) {
+    fetch(API_BASE + '/' + id, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ completed: completed })
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function () {
+        // обновляем локальную копию у нужной задачи
+        var item = todos.find(function (t) { return t.id === id; });
+        if (item) item.completed = completed;
+        renderList();
+      })
+      .catch(function (err) {
+        showMessage('Не удалось обновить задачу: ' + err.message, true);
+      });
+  }
+
+  // ---------- UPDATE: редактирование текста ----------
+
+  function startEdit(li, item) {
+    li.innerHTML = '';
+
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.value = item.todo;
+
+    var saveBtn = document.createElement('button');
+    saveBtn.type = 'button';
+    saveBtn.textContent = 'Сохранить';
+    saveBtn.addEventListener('click', function () {
+      saveEdit(item.id, input.value.trim());
+    });
+
+    var cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button';
+    cancelBtn.textContent = 'Отмена';
+    cancelBtn.addEventListener('click', renderList); // просто перерисовать как было
+
+    li.appendChild(input);
+    li.appendChild(saveBtn);
+    li.appendChild(cancelBtn);
+    input.focus();
+  }
+
+  function saveEdit(id, newText) {
+    if (!newText) {
+      showMessage('Текст задачи не может быть пустым.', true);
+      return;
+    }
+
+    fetch(API_BASE + '/' + id, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ todo: newText })
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function () {
+        var item = todos.find(function (t) { return t.id === id; });
+        if (item) item.todo = newText;
+        showMessage('');
+        renderList();
+      })
+      .catch(function (err) {
+        showMessage('Не удалось сохранить изменения: ' + err.message, true);
+      });
+  }
+
+  // ---------- DELETE: удаление задачи ----------
+
+  function deleteTodo(id) {
+    fetch(API_BASE + '/' + id, { method: 'DELETE' })
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function () {
+        todos = todos.filter(function (t) { return t.id !== id; });
+        renderList();
+      })
+      .catch(function (err) {
+        showMessage('Не удалось удалить задачу: ' + err.message, true);
       });
   }
 
