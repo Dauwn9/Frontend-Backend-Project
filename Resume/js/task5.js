@@ -121,21 +121,22 @@ var nextLocalId = -1;
 
   // ---------- UPDATE: отметка "выполнено" ----------
 
- function toggleComplete(id, completed) {
+function toggleComplete(id, completed) {
   var item = todos.find(function (t) {
     return t.id === id;
   });
 
   if (!item) return;
 
-  // Для локальных задач не отправляем запрос на сервер
-if (id < 0) {
-  item.todo = newText;
-  showMessage('');
-  renderList();
-  return;
+  // Если задача создана локально
+  if (id < 0) {
+    item.completed = completed;
+    renderList();
+    showMessage('');
+    return;
   }
 
+  // Если задача загружена с сервера
   fetch(API_BASE + '/' + id, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -148,9 +149,13 @@ if (id < 0) {
     .then(function () {
       item.completed = completed;
       renderList();
+      showMessage('');
     })
     .catch(function (err) {
-      showMessage('Не удалось обновить задачу: ' + err.message, true);
+      showMessage(
+        'Не удалось обновить задачу: ' + err.message,
+        true
+      );
       renderList();
     });
 }
@@ -182,31 +187,48 @@ if (id < 0) {
     input.focus();
   }
 
-  function saveEdit(id, newText) {
-    if (!newText) {
-      showMessage('Текст задачи не может быть пустым.', true);
-      return;
-    }
-
-    fetch(API_BASE + '/' + id, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ todo: newText })
-    })
-      .then(function (res) {
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        return res.json();
-      })
-      .then(function () {
-        var item = todos.find(function (t) { return t.id === id; });
-        if (item) item.todo = newText;
-        showMessage('');
-        renderList();
-      })
-      .catch(function (err) {
-        showMessage('Не удалось сохранить изменения: ' + err.message, true);
-      });
+function saveEdit(id, newText) {
+  if (!newText) {
+    showMessage('Текст задачи не может быть пустым.', true);
+    return;
   }
+
+  var item = todos.find(function (t) {
+    return t.id === id;
+  });
+
+  if (!item) return;
+
+  // Если задача создана локально
+  if (id < 0) {
+    item.todo = newText;
+    showMessage('');
+    renderList();
+    return;
+  }
+
+  // Если задача загружена с сервера
+  fetch(API_BASE + '/' + id, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ todo: newText })
+  })
+    .then(function (res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    })
+    .then(function () {
+      item.todo = newText;
+      showMessage('');
+      renderList();
+    })
+    .catch(function (err) {
+      showMessage(
+        'Не удалось сохранить изменения: ' + err.message,
+        true
+      );
+    });
+}
 
   // ---------- DELETE: удаление задачи ----------
 
