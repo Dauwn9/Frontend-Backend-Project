@@ -5,14 +5,14 @@
   var API_BASE = 'https://dummyjson.com/todos';
 
   var newTextInput = root.querySelector('#crudNewText');
-  var userIdInput = root.querySelector('#crudUserId');
+  var userIdInput  = root.querySelector('#crudUserId');
   var addBtn       = root.querySelector('#crudAddBtn');
   var message      = root.querySelector('#crudMessage');
   var list         = root.querySelector('#crudList');
 
-  var todos = []; 
-  // наша локальная копия списка задач
-var nextLocalId = -1;
+  var todos = []; // наша локальная копия списка задач
+  var nextLocalId = -1; // отрицательные id у задач, созданных локально
+
   function showMessage(text, isError) {
     message.textContent = text;
     message.classList.toggle('is-error', !!isError);
@@ -56,8 +56,7 @@ var nextLocalId = -1;
 
       var text = document.createElement('span');
       text.className = 'crud-item-text';
-      text.textContent =
-        item.todo + ' (User ID: ' + item.userId + ')';
+      text.textContent = item.todo + ' (User ID: ' + item.userId + ')';
 
       var editBtn = document.createElement('button');
       editBtn.type = 'button';
@@ -80,100 +79,79 @@ var nextLocalId = -1;
       list.appendChild(li);
     });
   }
-  
+
   function startEdit(li, item) {
-  li.innerHTML = '';
+    li.innerHTML = '';
 
-  var input = document.createElement('input');
-  input.type = 'text';
-  input.value = item.todo;
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.value = item.todo;
 
-  var saveBtn = document.createElement('button');
-  saveBtn.type = 'button';
-  saveBtn.textContent = 'Сохранить';
+    var saveBtn = document.createElement('button');
+    saveBtn.type = 'button';
+    saveBtn.textContent = 'Сохранить';
+    saveBtn.addEventListener('click', function () {
+      saveEdit(item.id, input.value.trim());
+    });
 
-  saveBtn.addEventListener('click', function () {
-    saveEdit(item.id, input.value.trim());
-  });
+    var cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button';
+    cancelBtn.textContent = 'Отмена';
+    cancelBtn.addEventListener('click', renderList);
 
-  var cancelBtn = document.createElement('button');
-  cancelBtn.type = 'button';
-  cancelBtn.textContent = 'Отмена';
+    li.appendChild(input);
+    li.appendChild(saveBtn);
+    li.appendChild(cancelBtn);
 
-  cancelBtn.addEventListener('click', renderList);
-
-  li.appendChild(input);
-  li.appendChild(saveBtn);
-  li.appendChild(cancelBtn);
-
-  input.focus();
-}
-  
+    input.focus();
+  }
 
   // ---------- CREATE: добавление новой задачи ----------
 
   function addTodo() {
-  var text = newTextInput.value.trim();
-  var userId = Number(userIdInput.value);
+    var text = newTextInput.value.trim();
+    var userId = Number(userIdInput.value);
 
-  if (!text) {
-    showMessage('Введите текст задачи.', true);
-    return;
-  }
+    if (!text) {
+      showMessage('Введите текст задачи.', true);
+      return;
+    }
 
-  if (!userId) {
-    showMessage('Введите User ID.', true);
-    return;
-  }
+    if (!userId) {
+      showMessage('Введите User ID.', true);
+      return;
+    }
 
-  fetch(API_BASE + '/add', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      todo: text,
-      completed: false,
-      userId: userId
-    })
-  })
-    .then(function (res) {
-      if (!res.ok) {
-        throw new Error('HTTP ' + res.status);
-      }
-      return res.json();
-    })
-    .then(function () {
-
-      var newTodo = {
-        id: nextLocalId--,
+    fetch(API_BASE + '/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
         todo: text,
         completed: false,
         userId: userId
-      };
-
-      todos.push(newTodo);
-
-      renderList();
-
-      newTextInput.value = '';
-      userIdInput.value = '';
-
-      showMessage('');
+      })
     })
-    .catch(function (err) {
-      showMessage(
-        'Не удалось добавить задачу: ' + err.message,
-        true
-      );
-    });
-}
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function () {
+        // dummyjson ничего не сохраняет, поэтому добавляем задачу
+        // в локальный список сами, с введённым userId
+        var newTodo = {
+          id: nextLocalId--,
+          todo: text,
+          completed: false,
+          userId: userId
+        };
 
-  todos.push(newTodo);
-  renderList();
-  newTextInput.value = '';
-  showMessage('');
-})
+        todos.push(newTodo);
+        renderList();
+
+        newTextInput.value = '';
+        userIdInput.value = '';
+        showMessage('');
+      })
       .catch(function (err) {
         showMessage('Не удалось добавить задачу: ' + err.message, true);
       });
@@ -181,119 +159,113 @@ var nextLocalId = -1;
 
   // ---------- UPDATE: отметка "выполнено" ----------
 
-function toggleComplete(id, completed) {
-  var item = todos.find(function (t) {
-    return t.id === id;
-  });
+  function toggleComplete(id, completed) {
+    var item = todos.find(function (t) {
+      return t.id === id;
+    });
 
-  if (!item) return;
+    if (!item) return;
 
-  // Если задача создана локально
-  if (id < 0) {
-    item.completed = completed;
-    renderList();
-    showMessage('');
-    return;
-  }
-
-  // Если задача загружена с сервера
-  fetch(API_BASE + '/' + id, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ completed: completed })
-  })
-    .then(function (res) {
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      return res.json();
-    })
-    .then(function () {
+    // Если задача создана локально
+    if (id < 0) {
       item.completed = completed;
       renderList();
       showMessage('');
+      return;
+    }
+
+    // Если задача загружена с сервера
+    fetch(API_BASE + '/' + id, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ completed: completed })
     })
-    .catch(function (err) {
-      showMessage(
-        'Не удалось обновить задачу: ' + err.message,
-        true
-      );
-      renderList();
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function () {
+        item.completed = completed;
+        renderList();
+        showMessage('');
+      })
+      .catch(function (err) {
+        showMessage('Не удалось обновить задачу: ' + err.message, true);
+        renderList();
+      });
+  }
+
+  // ---------- UPDATE: изменение текста ----------
+
+  function saveEdit(id, newText) {
+    if (!newText) {
+      showMessage('Текст задачи не может быть пустым.', true);
+      return;
+    }
+
+    var item = todos.find(function (t) {
+      return t.id === id;
     });
-}
-function saveEdit(id, newText) {
-  if (!newText) {
-    showMessage('Текст задачи не может быть пустым.', true);
-    return;
-  }
 
-  var item = todos.find(function (t) {
-    return t.id === id;
-  });
+    if (!item) return;
 
-  if (!item) return;
-
-  // Если задача новая и хранится локально
-  if (id < 0) {
-    item.todo = newText;
-    showMessage('');
-    renderList();
-    return;
-  }
-
-  // Если задача загружена с сервера
-  fetch(API_BASE + '/' + id, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ todo: newText })
-  })
-    .then(function (res) {
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      return res.json();
-    })
-    .then(function () {
+    // Если задача новая и хранится локально
+    if (id < 0) {
       item.todo = newText;
       showMessage('');
       renderList();
+      return;
+    }
+
+    // Если задача загружена с сервера
+    fetch(API_BASE + '/' + id, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ todo: newText })
     })
-    .catch(function (err) {
-      showMessage('Не удалось сохранить изменения: ' + err.message, true);
-    });
-}
-
-
-
-function deleteTodo(id) {
-
-  // Если задача создана локально
-  if (id < 0) {
-    todos = todos.filter(function (t) {
-      return t.id !== id;
-    });
-
-    renderList();
-    showMessage('');
-    return;
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function () {
+        item.todo = newText;
+        showMessage('');
+        renderList();
+      })
+      .catch(function (err) {
+        showMessage('Не удалось сохранить изменения: ' + err.message, true);
+      });
   }
 
-  // Если задача загружена с сервера
-  fetch(API_BASE + '/' + id, { method: 'DELETE' })
-    .then(function (res) {
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      return res.json();
-    })
-    .then(function () {
+  // ---------- DELETE: удаление ----------
+
+  function deleteTodo(id) {
+    // Если задача создана локально
+    if (id < 0) {
       todos = todos.filter(function (t) {
         return t.id !== id;
       });
-
       renderList();
-    })
-    .catch(function (err) {
-      showMessage(
-        'Не удалось удалить задачу: ' + err.message,
-        true
-      );
-    });
-}
+      showMessage('');
+      return;
+    }
+
+    // Если задача загружена с сервера
+    fetch(API_BASE + '/' + id, { method: 'DELETE' })
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function () {
+        todos = todos.filter(function (t) {
+          return t.id !== id;
+        });
+        renderList();
+      })
+      .catch(function (err) {
+        showMessage('Не удалось удалить задачу: ' + err.message, true);
+      });
+  }
 
   addBtn.addEventListener('click', addTodo);
   newTextInput.addEventListener('keydown', function (e) {
