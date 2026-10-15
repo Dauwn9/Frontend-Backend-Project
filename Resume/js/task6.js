@@ -1,4 +1,5 @@
 (function () {
+if (window.taskAppCleanup) window.taskAppCleanup();
 var API_BASE = 'https://dummyjson.com/todos';
 var USERS_URL = 'https://dummyjson.com/users';
 
@@ -64,7 +65,7 @@ $('more').onclick = function () { shown += 30; render(); };
 $('addBtn').onclick = function () { openForm(null, ''); };
 
 /* клики по списку (общий обработчик для главного списка и профиля) */
-document.addEventListener('click', function (e) {
+function onDocClick(e) {
   if (!e.target.closest('#taskApp')) return;
   var ed = e.target.closest('[data-edit]');
   if (ed) { e.stopPropagation(); openForm(+ed.dataset.edit); return; }
@@ -75,7 +76,8 @@ document.addEventListener('click', function (e) {
     var t = byId(+tk.dataset.id);
     if (tk.closest('.box')) { openForm(t.id); } else openPerson(t.userId, t.id);
   }
-});
+}
+document.addEventListener('click', onDocClick);
 
 function byId(id) { return todos.filter(function (t) { return t.id === id; })[0]; }
 
@@ -94,9 +96,14 @@ function openModal(html, onClose) {
   stack.push(item);
   return o;
 }
-document.addEventListener('keydown', function (e) {
+function onDocKey(e) {
   if (e.key === 'Escape' && stack.length) stack[stack.length - 1].close();
-});
+}
+document.addEventListener('keydown', onDocKey);
+window.taskAppCleanup = function () {
+  document.removeEventListener('click', onDocClick);
+  document.removeEventListener('keydown', onDocKey);
+};
 
 /* окно 1: данные человека */
 function openPerson(uid, fromTask) {
