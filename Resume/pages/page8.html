@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Менеджер задач</title>
+</head>
+<body>
+  <link rel="stylesheet" href="../css/style.css">
+<div id="taskApp">
+  <h1>Менеджер задач</h1>
+  <div class="sub">Нажмите на задачу — данные человека; на ID — сразу его карточка.</div>
+  <div class="bar">
+    <input type="search" id="q" placeholder="Поиск задач или ID…">
+    <select id="status">
+      <option value="all">Все статусы</option>
+      <option value="open">Не выполнены</option>
+      <option value="done">Выполнены</option>
+    </select>
+    <select id="sort">
+      <option value="id-asc">ID ↑</option>
+      <option value="id-desc">ID ↓</option>
+      <option value="text-asc">Текст А→Я</option>
+      <option value="text-desc">Текст Я→А</option>
+      <option value="status">Сначала невыполненные</option>
+      <option value="user">По ID человека</option>
+    </select>
+    <button class="primary" id="addBtn">+ Добавить</button>
+  </div>
+  <div class="stats" id="stats"></div>
+  <div id="list"></div>
+  <div class="row" style="justify-content:center"><button id="more" style="display:none">Показать ещё</button></div>
+</div>
+
+<script src="../js/task6.js"></script>
+</body>
+</html>

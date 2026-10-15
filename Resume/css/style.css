@@ -388,3 +388,175 @@ h1 {
 #crudRoot .crud-modal-response[hidden] {
   display: none;
 }
+/* Все стили менеджера задач живут только внутри #taskApp,
+   поэтому не пересекаются с остальным сайтом.
+   Цвета берутся из ваших переменных (--surface, --text, --border, --accent ...),
+   поэтому тёмная тема (body.dark-theme) работает сама. Если переменных нет — используются запасные значения. */
+
+#taskApp {
+  --t-card: var(--surface, #fff);
+  --t-input: var(--surface-2, #f0f2f5);
+  --t-text: var(--text, #222);
+  --t-muted: var(--text-muted, #666);
+  --t-line: var(--border, #ccc);
+  --t-accent: var(--accent, #0a6cff);
+  --t-danger: var(--danger, #c62828);
+  --t-shadow: var(--shadow, rgba(0, 0, 0, .15));
+  --t-ok: #2e9d4f;
+  --t-warn: #e08a00;
+ 
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 10px 16px 60px;
+  color: var(--t-text);
+  font: 15px/1.45 Arial, sans-serif;
+}
+#taskApp *, #taskApp *::before, #taskApp *::after { box-sizing: border-box; }
+ 
+/* ---------- Заголовок ---------- */
+#taskApp h1 { font-size: 28px; margin: 0 0 6px; padding: 10px 0 0; }
+#taskApp .sub { color: var(--t-muted); margin-bottom: 22px; text-align: center; }
+ 
+/* ---------- Панель управления ---------- */
+#taskApp .bar {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  background: var(--t-card);
+  border-radius: 12px;
+  box-shadow: 0 4px 10px var(--t-shadow);
+  padding: 14px;
+  margin-bottom: 16px;
+}
+#taskApp .bar input[type=search] { flex: 1 1 220px; }
+ 
+#taskApp input, #taskApp select, #taskApp textarea, #taskApp button {
+  font: inherit;
+  color: var(--t-text);
+  background: var(--t-input);
+  border: 1px solid var(--t-line);
+  border-radius: 8px;
+  padding: 9px 12px;
+  margin: 0;
+  transition: border-color .2s, box-shadow .2s, background-color .2s, transform .15s, color .2s;
+}
+#taskApp input:focus, #taskApp select:focus, #taskApp textarea:focus {
+  outline: none;
+  border-color: var(--t-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--t-accent) 25%, transparent);
+}
+#taskApp button { cursor: pointer; font-weight: bold; }
+#taskApp button:hover { border-color: var(--t-accent); color: var(--t-accent); }
+#taskApp button:active { transform: scale(.96); }
+ 
+#taskApp .primary {
+  background: var(--t-accent);
+  border-color: var(--t-accent);
+  color: #fff;
+}
+#taskApp .primary:hover { color: #fff; filter: brightness(1.1); }
+ 
+#taskApp .stats { color: var(--t-muted); font-size: 13px; margin: 0 4px 12px; }
+ 
+/* ---------- Карточка задачи ---------- */
+#taskApp .task {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--t-card);
+  color: var(--t-text);
+  border-radius: 10px;
+  border-left: 5px solid var(--t-warn);
+  box-shadow: 0 4px 10px var(--t-shadow);
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+#taskApp .task.done { border-left-color: var(--t-ok); }
+#taskApp .task:hover { transform: translateY(-3px); box-shadow: 0 8px 18px var(--t-shadow); }
+#taskApp .task .txt { flex: 1; min-width: 0; font-size: 16px; }
+#taskApp .task.done .txt { text-decoration: line-through; color: var(--t-muted); }
+ 
+/* ---------- Бейджи ---------- */
+#taskApp .chip {
+  font-size: 12px; font-weight: bold;
+  padding: 4px 10px; border-radius: 999px;
+  background: var(--t-input);
+  color: var(--t-muted);
+  white-space: nowrap;
+}
+#taskApp .chip.st-done { background: color-mix(in srgb, var(--t-ok) 18%, transparent); color: var(--t-ok); }
+#taskApp .chip.st-open { background: color-mix(in srgb, var(--t-warn) 18%, transparent); color: var(--t-warn); }
+#taskApp .chip.user {
+  background: color-mix(in srgb, var(--t-accent) 14%, transparent);
+  color: var(--t-accent);
+  cursor: pointer;
+  transition: background-color .2s, color .2s;
+}
+#taskApp .chip.user:hover { background: var(--t-accent); color: #fff; }
+ 
+#taskApp .icon { padding: 6px 10px; font-size: 15px; }
+ 
+/* ---------- Модальные окна ---------- */
+#taskApp .overlay {
+  position: fixed; inset: 0;
+  background: rgba(0, 0, 0, .55);
+  backdrop-filter: blur(3px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+  animation: t-fade .2s ease;
+}
+#taskApp .box {
+  background: var(--t-card);
+  color: var(--t-text);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px var(--t-shadow);
+  max-width: 560px; width: 100%; max-height: 88vh; overflow: auto;
+  padding: 26px;
+  position: relative;
+  animation: t-pop .25s ease;
+}
+#taskApp .box h2 { margin: 0 0 14px; font-size: 22px; color: var(--t-text); }
+#taskApp .x {
+  position: absolute; top: 12px; right: 14px;
+  width: 34px; height: 34px; padding: 0;
+  border: none; border-radius: 50%;
+  background: transparent;
+  font-size: 22px; line-height: 1; color: var(--t-muted);
+}
+#taskApp .x:hover { background: var(--t-input); color: var(--t-danger); }
+ 
+@keyframes t-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes t-pop { from { opacity: 0; transform: translateY(14px) scale(.97); } to { opacity: 1; transform: none; } }
+ 
+/* ---------- Профиль человека ---------- */
+#taskApp .person { display: flex; gap: 18px; align-items: center; margin-bottom: 14px; }
+#taskApp .person img {
+  width: 90px; height: 90px; border-radius: 50%;
+  object-fit: cover;
+  background: var(--t-input);
+  box-shadow: 0 4px 10px var(--t-shadow);
+  border: 3px solid var(--t-accent);
+}
+#taskApp .person h2 { margin: 0 0 6px; }
+#taskApp .kv {
+  display: grid; grid-template-columns: 110px 1fr; gap: 0;
+  margin: 12px 0 18px;
+  border: 1px solid var(--t-line); border-radius: 10px; overflow: hidden;
+}
+#taskApp .kv span { padding: 9px 12px; border-bottom: 1px solid var(--t-line); word-break: break-word; }
+#taskApp .kv span:nth-child(odd) { background: var(--t-input); color: var(--t-muted); font-weight: bold; }
+#taskApp .kv span:nth-last-child(-n+2) { border-bottom: none; }
+#taskApp .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+ 
+/* ---------- Форма ---------- */
+#taskApp label { display: block; margin: 12px 0 5px; color: var(--t-muted); font-size: 13px; font-weight: bold; }
+#taskApp .box input[type=text],
+#taskApp .box input[type=number],
+#taskApp .box textarea { width: 100%; }
+#taskApp .box input[type=checkbox] { width: 16px; height: 16px; margin-right: 6px; vertical-align: middle; accent-color: var(--t-accent); }
+#taskApp .err { color: var(--t-danger); font-size: 13px; min-height: 18px; margin-top: 8px; }
+#taskApp .empty { text-align: center; color: var(--t-muted); padding: 30px; }
+ 
+@media (max-width: 560px) {
+  #taskApp .task { flex-wrap: wrap; }
+  #taskApp .task .txt { flex-basis: 100%; order: -1; }
+  #taskApp .kv { grid-template-columns: 90px 1fr; }
+}
