@@ -67,9 +67,7 @@ function userChip(uid) {
 function taskHTML(t, inProfile) {
   return '<div class="task ' + (t.completed ? 'done' : '') + '" data-id="' + t.id + '">' +
     '<input type="checkbox" class="chk" data-check="' + t.id + '"' + (t.completed ? ' checked' : '') + ' title="Отметить выполненной">' +
-    '<span class="chip">#' + t.id + '</span>' +
     '<span class="txt">' + esc(t.todo) + '</span>' +
-    '<span class="chip ' + (t.completed ? 'st-done' : 'st-open') + '">' + (t.completed ? 'Выполнена' : 'В работе') + '</span>' +
     (inProfile ? '' : userChip(t.userId)) +
     '<button class="icon" data-edit="' + t.id + '" title="Редактировать">✎</button>' +
     '<button class="icon del" data-del="' + t.id + '" title="Удалить">🗑</button></div>';
