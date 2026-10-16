@@ -560,3 +560,23 @@ h1 {
   #taskApp .task .txt { flex-basis: 100%; order: -1; }
   #taskApp .kv { grid-template-columns: 90px 1fr; }
 }
+
+/* ===== Окно человека (Task 4): широкое окно в две колонки ===== */
+.box.wide {
+  max-width: 1040px;
+  width: 100%;
+}
+.split {
+  display: grid;
+  grid-template-columns: minmax(260px, 340px) 1fr;
+  gap: 28px;
+  align-items: start;
+}
+.split-left .kv span {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 760px) {
+  .split {
+    grid-template-columns: 1fr;
+  }
+}
