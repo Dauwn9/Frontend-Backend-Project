@@ -562,23 +562,28 @@ h1 {
 }
 
 /* ===== Окно человека (Task 4): широкое окно в две колонки ===== */
-.box.wide {
-  max-width: 1040px;
-  width: 100%;
+/* ===== Окно человека: широкое, в две колонки ===== */
+#taskApp .box.wide {
+  max-width: 1100px;
+  overflow-x: hidden;
 }
-.split {
+#taskApp .split {
   display: grid;
-  grid-template-columns: minmax(260px, 340px) 1fr;
+  grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
   gap: 28px;
   align-items: start;
 }
-.split-left .kv span {
-  overflow-wrap: anywhere;
+#taskApp .split-left .kv span { overflow-wrap: anywhere; }
+#taskApp .split-right h2 { margin-top: 0; }
+#taskApp .split-right .sub { text-align: left; margin-bottom: 12px; }
+#taskApp .split-tasks {
+  max-height: 55vh;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 @media (max-width: 760px) {
-  .split {
-    grid-template-columns: 1fr;
-  }
+  #taskApp .split { grid-template-columns: 1fr; }
+  #taskApp .split-tasks { max-height: none; }
 }
 
 
@@ -596,3 +601,39 @@ h1 {
     max-height: none;
   }
 }
+/* ===== Чип человека с аватаркой ===== */
+#taskApp .chip.user {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px 3px 4px;
+}
+#taskApp .chip.user img {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--t-input);
+}
+#taskApp .chip.user small { opacity: .75; font-weight: normal; }
+
+/* ===== Чекбокс и удаление ===== */
+#taskApp .task input.chk {
+  width: 20px; height: 20px;
+  padding: 0;
+  flex-shrink: 0;
+  cursor: pointer;
+  accent-color: var(--t-ok);
+}
+#taskApp .icon.del:hover {
+  border-color: var(--t-danger);
+  color: var(--t-danger);
+}
+/* ===== Фильтр в окне человека ===== */
+#taskApp .bar.mini {
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  margin-bottom: 14px;
+}
+#taskApp .bar.mini input[type=search] { flex: 1 1 150px; min-width: 0; }
+#taskApp .bar.mini select { flex: 0 1 auto; max-width: 100%; }
