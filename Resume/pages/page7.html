@@ -3,26 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Task 4 — Список задач</title>
+  <title>Task 4 — Менеджер задач</title>
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
 
-  <div class="resume-container" id="crudRoot">
-
-    <div class="card">
-      <h2>Задачи</h2>
-      <button type="button" id="crudAddBtn">Добавить задачу</button>
-      <p class="crud-message" id="crudMessage"></p>
-    </div>
-
-    <div class="card">
-      <h2>Список задач</h2>
-      <ul class="crud-list" id="crudList"></ul>
-    </div>
-
+<div id="taskApp">
+  <h1>Менеджер задач</h1>
+  <div class="bar">
+    <input type="search" id="q" placeholder="Поиск задач или ID…">
+    <select id="status">
+      <option value="all">Все статусы</option>
+      <option value="open">Не выполнены</option>
+      <option value="done">Выполнены</option>
+    </select>
+    <select id="sort">
+      <option value="id-asc">ID ↑</option>
+      <option value="id-desc">ID ↓</option>
+      <option value="text-asc">Текст А→Я</option>
+      <option value="text-desc">Текст Я→А</option>
+      <option value="status">Сначала невыполненные</option>
+      <option value="user">По ID человека</option>
+    </select>
   </div>
+  <div class="stats" id="stats"></div>
+  <div id="list"></div>
+  <div class="row" style="justify-content:center"><button id="more" style="display:none">Показать ещё</button></div>
+</div>
 
-  <script src="../js/task5.js"></script>
+<script src="../js/task5.js"></script>
 </body>
 </html>
