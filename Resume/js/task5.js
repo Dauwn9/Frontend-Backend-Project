@@ -42,13 +42,13 @@ function filtered() {
   return a;
 }
 
-function taskHTML(t) {
+function taskHTML(t, inProfile) {
   return '<div class="task ' + (t.completed ? 'done' : '') + '" data-id="' + t.id + '">' +
     '<span class="chip">#' + t.id + '</span>' +
     '<span class="txt">' + esc(t.todo) + '</span>' +
     '<span class="chip ' + (t.completed ? 'st-done' : 'st-open') + '">' + (t.completed ? 'Выполнена' : 'В работе') + '</span>' +
-    '<span class="chip user" data-user="' + t.userId + '" title="Открыть человека">👤 ' + t.userId + '</span>' +
-    '</div>';
+    (inProfile ? '' : '<span class="chip user" data-user="' + t.userId + '" title="Открыть человека">👤 ' + t.userId + '</span>') +
+    '<button class="icon" data-edit="' + t.id + '" title="Редактировать">✎</button></div>';
 }
 
 function render() {
@@ -62,16 +62,19 @@ function render() {
   $(id).addEventListener('input', function () { shown = 30; render(); });
 });
 $('more').onclick = function () { shown += 30; render(); };
+$('addBtn').onclick = function () { openForm(null, ''); };
 
-/* клики по списку */
+/* клики по списку (общий обработчик для главного списка и окна человека) */
 function onDocClick(e) {
   if (!e.target.closest('#taskApp')) return;
+  var ed = e.target.closest('[data-edit]');
+  if (ed) { e.stopPropagation(); openForm(+ed.dataset.edit); return; }
   var us = e.target.closest('[data-user]');
   if (us) { e.stopPropagation(); openPerson(+us.dataset.user); return; }
   var tk = e.target.closest('.task');
   if (tk) {
     var t = byId(+tk.dataset.id);
-    openPerson(t.userId, t.id);
+    if (tk.closest('.box')) { openForm(t.id); } else openPerson(t.userId, t.id);
   }
 }
 document.addEventListener('click', onDocClick);
@@ -102,25 +105,87 @@ window.taskAppCleanup = function () {
   document.removeEventListener('keydown', onDocKey);
 };
 
-/* окно человека: его данные (список его задач добавит часть 3) */
+/* окно человека: слева его данные, справа его задачи */
 function openPerson(uid, fromTask) {
   var o = openModal('<div class="empty">Загрузка…</div>');
+  o.querySelector('.box').classList.add('wide');
   function draw() {
     getUser(uid).then(function (u) {
       var mine = todos.filter(function (t) { return t.userId === uid; }).sort(function (a, b) { return a.id - b.id; });
+      var done = mine.filter(function (t) { return t.completed; }).length;
       var rows = [['ID', u.id || uid], ['Возраст', u.age], ['Email', u.email], ['Телефон', u.phone],
         ['Компания', u.company && u.company.name], ['Должность', u.company && u.company.title],
         ['Город', u.address && u.address.city], ['Задач', mine.length]]
         .filter(function (r) { return r[1] !== undefined && r[1] !== null && r[1] !== ''; });
       var box = o.querySelector('.box');
       box.innerHTML = '<button class="x">×</button>' +
+        '<div class="split"><div class="split-left">' +
         '<div class="person">' + (u.image ? '<img src="' + esc(u.image) + '" alt="">' : '<img alt="">') +
         '<div><h2 style="margin:0">' + esc(u.firstName + ' ' + u.lastName) + '</h2>' +
         (u.username ? '<span class="chip">@' + esc(u.username) + '</span>' : '') + '</div></div>' +
-        '<div class="kv">' + rows.map(function (r) { return '<span>' + r[0] + '</span><span>' + esc(r[1]) + '</span>'; }).join('') + '</div>';
+        '<div class="kv">' + rows.map(function (r) { return '<span>' + r[0] + '</span><span>' + esc(r[1]) + '</span>'; }).join('') + '</div>' +
+        '</div><div class="split-right">' +
+        '<h2>Задачи</h2>' +
+        '<div class="sub">задач: ' + mine.length + ', выполнено: ' + done + '</div>' +
+        '<div class="row" style="margin:0 0 12px"><button class="primary" id="pAdd">+ Добавить задачу</button></div>' +
+        '<div class="split-tasks">' +
+        (mine.map(function (t) { return taskHTML(t, true); }).join('') || '<div class="empty">Задач пока нет</div>') +
+        '</div></div></div>';
       box.querySelector('.x').onclick = function () { stack.filter(function (s) { return s.el === o; })[0].close(); };
+      box.querySelector('#pAdd').onclick = function () { openForm(null, uid); };
     });
   }
   o._redraw = draw; draw();
+}
+
+function refreshAll() {
+  render();
+  stack.forEach(function (s) { if (s.el._redraw) s.el._redraw(); });
+}
+
+/* окно 3: добавление / редактирование */
+function openForm(id, uid) {
+  var t = id != null ? byId(id) : null;
+  var nextId = todos.reduce(function (m, x) { return Math.max(m, x.id); }, 0) + 1;
+  var o = openModal(
+    '<h2>' + (t ? 'Редактировать задачу' : 'Новая задача') + '</h2>' +
+    '<label>Текст задачи</label><textarea id="fText" rows="3">' + (t ? esc(t.todo) : '') + '</textarea>' +
+    '<label>ID задачи</label><input type="number" id="fId" min="1" value="' + (t ? t.id : nextId) + '">' +
+    '<label>ID человека</label><input type="number" id="fUser" min="1" value="' + (t ? t.userId : (uid || 1)) + '">' +
+    '<label><input type="checkbox" id="fDone"' + (t && t.completed ? ' checked' : '') + '> Выполнена</label>' +
+    '<div class="err" id="fErr"></div>' +
+    '<div class="row"><button class="primary" id="fSave">Сохранить</button><button id="fCancel">Отмена</button>' +
+    (t ? '<button id="fDel" style="margin-left:auto;color:var(--danger)">Удалить</button>' : '') + '</div>');
+  var me = stack[stack.length - 1];
+  o.querySelector('#fCancel').onclick = me.close;
+  o.querySelector('#fText').focus();
+  if (t) o.querySelector('#fDel').onclick = function () {
+    if (!confirm('Удалить задачу #' + t.id + '?')) return;
+    todos = todos.filter(function (x) { return x !== t; });
+    fetch(API_BASE + '/' + t.id, { method: 'DELETE' }).catch(function () {});
+    me.close(); refreshAll();
+  };
+  o.querySelector('#fSave').onclick = function () {
+    var text = o.querySelector('#fText').value.trim();
+    var nid = parseInt(o.querySelector('#fId').value, 10);
+    var nuser = parseInt(o.querySelector('#fUser').value, 10);
+    var done = o.querySelector('#fDone').checked, err = o.querySelector('#fErr');
+    if (!text) { err.textContent = 'Введите текст задачи'; return; }
+    if (!(nid > 0) || !(nuser > 0)) { err.textContent = 'ID должны быть положительными числами'; return; }
+    var clash = byId(nid);
+    if (clash && clash !== t) { err.textContent = 'Задача с ID ' + nid + ' уже существует'; return; }
+    var body = JSON.stringify({ todo: text, completed: done, userId: nuser });
+    var hdr = { 'Content-Type': 'application/json' };
+    if (t) {
+      var oldUser = t.userId;
+      fetch(API_BASE + '/' + t.id, { method: 'PUT', headers: hdr, body: body }).catch(function () {});
+      t.id = nid; t.todo = text; t.completed = done; t.userId = nuser;
+    } else {
+      fetch(API_BASE + '/add', { method: 'POST', headers: hdr, body: body }).catch(function () {});
+      todos.unshift({ id: nid, todo: text, completed: done, userId: nuser });
+    }
+    me.close(); refreshAll();
+    if (t && oldUser !== nuser) { /* задача переехала к другому человеку */ }
+  };
 }
 })();

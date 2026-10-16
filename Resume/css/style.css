@@ -580,3 +580,19 @@ h1 {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* ===== Окно человека (Task 4): список задач справа ===== */
+.split-right h2 {
+  margin-top: 0;
+}
+.split-tasks {
+  max-height: 55vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+@media (max-width: 760px) {
+  .split-tasks {
+    max-height: none;
+  }
+}
